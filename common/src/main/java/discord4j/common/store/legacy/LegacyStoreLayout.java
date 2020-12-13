@@ -23,6 +23,7 @@ import discord4j.common.store.api.layout.StoreLayout;
 import discord4j.common.store.api.object.InvalidationCause;
 import discord4j.common.store.api.object.PresenceAndUserData;
 import discord4j.common.util.Snowflake;
+import discord4j.discordjson.Id;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
@@ -750,7 +751,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                     MemberData newMember = MemberData.builder()
                             .from(oldMember)
                             .nick(dispatch.nick())
-                            .roles(dispatch.roles())
+                            .roles(dispatch.roles().stream().map(Id::of).collect(Collectors.toList()))
                             .premiumSince(dispatch.premiumSince())
                             .build();
 
@@ -767,7 +768,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 .find(guildId)
                 .map(guild -> GuildData.builder()
                         .from(guild)
-                        .addRoles(role.id())
+                        .addRole(role.id())
                         .build())
                 .flatMap(guild -> stateHolder.getGuildStore().save(guildId, guild))
                 .doOnSubscribe(s -> log.trace("GuildRoleCreate doOnSubscribe {}", guildId))
